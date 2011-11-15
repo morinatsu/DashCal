@@ -1,8 +1,10 @@
 application: comdashcal
-version: 1
+version: 100beta
 runtime: python
 api_version: 1
 
 handlers:
 - url: /ical
+  script: main.py
+- url: /.*
   script: main.py

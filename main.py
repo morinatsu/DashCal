@@ -7,6 +7,7 @@ Rresponse ical data from ComicDash! new comic calender
         /ical ... Convert to ical data
 """
 import logging
+import re
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import urlfetch
@@ -17,10 +18,30 @@ class Converter(webapp.RequestHandler):
     """Convertier class"""
     def get(self):
         """Convert to ical data"""
+        def get_user():
+            """get username from GET parameter"""
+            username = self.request.get("user")
+            if username:
+                user = re.match(r'(^[A-Za-z][A-Za-z0-9-]+$)', username)
+            else:
+                user = None
+            if user:
+                return user.group(1)
+            else:
+                raise ValueError
+
         # Set Content-Type
         self.response.headers["Content-Type"] = "text/plain;charset=UTF-8"
+        # get user
+        try:
+            user = get_user()
+        except ValueError:
+            # invalid user
+            self.response.set_status(400)
+            return
         # fetch
-        page = urlfetch.fetch("http://ckworks.jp/comicdash/calendar/morinatsu")
+        url = "http://ckworks.jp/comicdash/calendar/" + user
+        page = urlfetch.fetch(url)
         # Convert to ical data
         if page.status_code == 200:
             dashcal = DashCal(page.content)
