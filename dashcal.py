@@ -5,7 +5,9 @@ dashcal: comic dash calendar to ical
     convert ComicDash! new comic calendar to .ical
 """
 import re
-from BeautifulSoup import BeautifulSoup
+import logging
+from bs4 import BeautifulSoup
+logging.getLogger().setLevel(logging.DEBUG)
 
 
 class DashCal(object):
@@ -30,31 +32,33 @@ class DashCal(object):
 
             """
             matched_title = re.search(
-                r'<a href="/comicdash/series/[0-9]+">([^<&].*[^>])</a>',
+                r'<a href="/comicdash/series/[0-9]+">([^<>]*)</a><br',
                 unicode(entry),
                 re.M
                 )
             if matched_title:
                 title = matched_title.group(1)
+                logging.debug('title: %s', unicode(title)[0:50])
             else:
                 title = None
             matched_image = re.search(
-                r'(<img src="/comicdash/images/.*" />)',
+                r'<img.*/>',
                 unicode(entry),
                 re.M
                 )
             if matched_image:
-                image = matched_image.group(1)
+                image = matched_image.group(0)
+                logging.debug('image: %s', unicode(image)[0:50])
             else:
                 image = None
             matched_date = re.search(
-                r'<span style="font-size: 80%;">.*</span><br />'
-                r'([0-9]{4}/[0-9]{2}/[0-9]{2})<br />',
+                r'([0-9]{4}/[0-9]{2}/[0-9]{2})',
                 unicode(entry),
                 re.M
                 )
             if matched_date:
                 date = matched_date.group(1)
+                logging.debug('date: %s', unicode(date)[0:50])
             else:
                 date = None
             return dict({"date": date, "title": title, "image": image})
@@ -63,13 +67,15 @@ class DashCal(object):
         self.booklist = []
         soup = BeautifulSoup(html)
         main_content = soup.body.find('div', id='main')
+        logging.debug('main_content: %s', unicode(main_content)[0:20])
         listedit = main_content.find(
             'form',
-            attrs={'name': 'listedit'},
-            recursive=False
+            attrs={'name': 'listedit'}
             )
-        entries = listedit.findAll('div', recursive=False)
+        logging.debug('listedit: %s', unicode(listedit)[0:20])
+        entries = listedit.find_all('div', recursive=False)
         for entry in entries:
+            logging.debug('entry: %s', unicode(entry)[0:50])
             self.booklist.append(pickup_entry(entry))
 
     def to_ical(self):
