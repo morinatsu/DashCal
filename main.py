@@ -47,6 +47,5 @@ class Converter(webapp2.RequestHandler):
             self.response.out.write(dashcal.to_ical())
 
 
-logging.getLogger().setLevel(logging.DEBUG)
 app = webapp2.WSGIApplication(
     [("/ical", Converter)], debug=True)
