@@ -40,7 +40,7 @@ class Converter(webapp2.RequestHandler):
             return
         # fetch
         url = "http://ckworks.jp/comicdash/calendar/" + user
-        page = urlfetch.fetch(url)
+        page = urlfetch.fetch(url, deadline=10)
         # Convert to ical data
         if page.status_code == 200:
             dashcal = DashCal(page.content)
