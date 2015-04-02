@@ -47,11 +47,13 @@ class Converter(webapp2.RequestHandler):
             url = "http://ckworks.jp/comicdash/calendar/" + user
             try:
                 page = urlfetch.fetch(url, deadline=10)
+                if page.status_code == 200:
+                    page_content = page.content
+                    memcache.add(user, page_content, time=7200)
             except DeadlineExceededError:
                 taskqueue.add(url='/fetcher', params={'user': user})
-            if page.status_code == 200:
-                page_content = page.content
-                memcache.add(user, page_content, time=7200)
+                self.response.set_status(500)
+                return
         # Convert to ical data
         dashcal = DashCal(page_content)
         self.response.out.write(dashcal.to_ical())
