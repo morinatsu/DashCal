@@ -7,5 +7,7 @@ threadsafe: true
 handlers:
 - url: /ical
   script: main.app
+- url: /fetcher
+  script: main.app
 - url: /.*
   script: main.app

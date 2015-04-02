@@ -11,11 +11,13 @@ import re
 import webapp2
 from google.appengine.api import urlfetch
 from google.appengine.api import memcache
+from google.appengine.api import taskqueue
+from google.appengine.runtime import DeadlineExceededError
 from dashcal import DashCal
 
 
 class Converter(webapp2.RequestHandler):
-    """Convertier class"""
+    """Converter class"""
     def get(self):
         """Convert to ical data"""
         def get_user():
@@ -40,20 +42,38 @@ class Converter(webapp2.RequestHandler):
             self.response.set_status(400)
             return
         page_content = memcache.get(user)
+        if page_content is None:
+            # fetch
+            url = "http://ckworks.jp/comicdash/calendar/" + user
+            try:
+                page = urlfetch.fetch(url, deadline=10)
+            except DeadlineExceededError:
+                taskqueue.add(url='/fetcher', params={'user': user})
+            if page.status_code == 200:
+                page_content = page.content
+                memcache.add(user, page_content, time=7200)
+        # Convert to ical data
+        dashcal = DashCal(page_content)
+        self.response.out.write(dashcal.to_ical())
+
+
+class Fetcher(webapp2.RequestHandler):
+    """Fetcher class"""
+    def post(self):
+        """Cache page content offline"""
+        user = self.request.get("user")
+        page_content = memcache.get(user)
         if page_content is not None:
-            dashcal = DashCal(page_content)
-            self.response.out.write(dashcal.to_ical())
             return
         # fetch
         url = "http://ckworks.jp/comicdash/calendar/" + user
-        page = urlfetch.fetch(url, deadline=10)
-        # Convert to ical data
+        page = urlfetch.fetch(url, deadline=120)
+        # Cache page content
         if page.status_code == 200:
             memcache.add(user, page.content, time=7200)
-            dashcal = DashCal(page.content)
-            self.response.out.write(dashcal.to_ical())
 
 
 logging.getLogger().setLevel(logging.INFO)
 app = webapp2.WSGIApplication(
-    [("/ical", Converter)], debug=True)
+    [("/ical", Converter),
+     ("/fetcher", Fetcher)], debug=True)
