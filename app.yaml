@@ -1,5 +1,5 @@
 application: comdashcal
-version: 150dev
+version: 150
 runtime: python27
 api_version: 1
 threadsafe: true
