@@ -12,7 +12,7 @@ import webapp2
 from google.appengine.api import urlfetch
 from google.appengine.api import memcache
 from google.appengine.api import taskqueue
-from google.appengine import runtime
+from google.appengine.api import urlfetch_errors
 from dashcal import DashCal
 
 
@@ -47,7 +47,7 @@ class Converter(webapp2.RequestHandler):
             url = "http://ckworks.jp/comicdash/calendar/" + user
             try:
                 page = urlfetch.fetch(url, deadline=10)
-            except runtime.DeadlineExceededError:
+            except urlfetch_errors.DeadlineExceededError:
                 taskqueue.add(url='/fetcher', params={'user': user})
                 self.response.set_status(500)
                 return
