@@ -1,13 +1,1 @@
-application: comdashcal
-version: 150
-runtime: python27
-api_version: 1
-threadsafe: true
-
-handlers:
-- url: /ical
-  script: main.app
-- url: /fetcher
-  script: main.app
-- url: /.*
-  script: main.app
+runtime: python37

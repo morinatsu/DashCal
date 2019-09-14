@@ -33,49 +33,49 @@ class DashCal(object):
             """
             matched_title = re.search(
                 r'<a href="/comicdash/series/[0-9]+">([^<>]*)</a><br',
-                unicode(entry),
+                str(entry),
                 re.M
                 )
             if matched_title:
                 title = matched_title.group(1)
-                logging.debug('title: %s', unicode(title)[0:50])
+                logging.debug('title: %s', str(title)[0:50])
             else:
                 title = None
             matched_image = re.search(
                 r'<img.*/>',
-                unicode(entry),
+                str(entry),
                 re.M
                 )
             if matched_image:
                 image = matched_image.group(0)
-                logging.debug('image: %s', unicode(image)[0:50])
+                logging.debug('image: %s', str(image)[0:50])
             else:
                 image = None
             matched_date = re.search(
                 r'([0-9]{4}/[0-9]{2}/[0-9]{2})',
-                unicode(entry),
+                str(entry),
                 re.M
                 )
             if matched_date:
                 date = matched_date.group(1)
-                logging.debug('date: %s', unicode(date)[0:50])
+                logging.debug('date: %s', str(date)[0:50])
             else:
                 date = None
             return dict({"date": date, "title": title, "image": image})
 
         self.html = html
         self.booklist = []
-        soup = BeautifulSoup(html)
+        soup = BeautifulSoup(html, 'html.parser')
         main_content = soup.body.find('div', id='main')
-        logging.debug('main_content: %s', unicode(main_content)[0:20])
+        logging.debug('main_content: %s', str(main_content)[0:20])
         listedit = main_content.find(
             'form',
             attrs={'name': 'listedit'}
             )
-        logging.debug('listedit: %s', unicode(listedit)[0:20])
+        logging.debug('listedit: %s', str(listedit)[0:20])
         entries = listedit.find_all('div', recursive=False)
         for entry in entries:
-            logging.debug('entry: %s', unicode(entry)[0:50])
+            logging.debug('entry: %s', str(entry)[0:50])
             self.booklist.append(pickup_entry(entry))
 
     def to_ical(self):
@@ -92,29 +92,29 @@ class DashCal(object):
                 list of string(a VEVENT)
             """
             date = book['date'].replace("/", "")
-            return [u"BEGIN:VEVENT",
-                    u"DTSTART;VALUE=DATE:%(dtstart)s" % {'dtstart': date},
-                    u"DTEND;VALUE=DATE:%(dtend)s" % {'dtend': date},
-                    u"SUMMARY:%(title)s" % {'title': book['title']},
-                    u"DESCRIPTION;ENCODING=QUOTED-PRINTABLE:No description",
-                    u"END:VEVENT"
+            return ["BEGIN:VEVENT",
+                    "DTSTART;VALUE=DATE:%(dtstart)s" % {'dtstart': date},
+                    "DTEND;VALUE=DATE:%(dtend)s" % {'dtend': date},
+                    "SUMMARY:%(title)s" % {'title': book['title']},
+                    "DESCRIPTION;ENCODING=QUOTED-PRINTABLE:No description",
+                    "END:VEVENT"
                    ]
 
         # header
-        ical = [u"BEGIN:VCALENDAR",
-                u"PRODID:DashCal",
-                u"X-WR-CALNAME:ComicDashCalender",
-                u"VERSION:2.0"]
+        ical = ["BEGIN:VCALENDAR",
+                "PRODID:DashCal",
+                "X-WR-CALNAME:ComicDashCalender",
+                "VERSION:2.0"]
         # vevents
         for book in self.booklist:
             if book['date']:
                 ical.extend(to_ical_entry(book))
         # footer
-        ical.append(u"END:VCALENDAR")
+        ical.append("END:VCALENDAR")
         return "\n".join(ical)
 
 
 if __name__ == "__main__":
     html = open('morinatsu.html', 'r')
     dashcal = DashCal(html)
-    print dashcal.to_ical()
+    print(dashcal.to_ical())
