@@ -27,8 +27,7 @@ def convert():
             user = None
         if user:
             return user.group(1)
-        else:
-            raise ValueError
+        raise ValueError
 
     # get user
     try:
@@ -40,7 +39,7 @@ def convert():
     # fetch
     url = "http://ckworks.jp/comicdash/calendar/" + user
     try:
-        res = requests.get(url)
+        res = requests.get(url, timeout=60.0)
     except requests.Timeout:
         resp = make_response("", 500)
         return resp

@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 logging.getLogger().setLevel(logging.DEBUG)
 
 
-class DashCal(object):
+class DashCal():
     """converter class http responce to ical"""
     def __init__(self, html):
         """initialize instance"""
@@ -93,9 +93,9 @@ class DashCal(object):
             """
             date = book['date'].replace("/", "")
             return ["BEGIN:VEVENT",
-                    "DTSTART;VALUE=DATE:%(dtstart)s" % {'dtstart': date},
-                    "DTEND;VALUE=DATE:%(dtend)s" % {'dtend': date},
-                    "SUMMARY:%(title)s" % {'title': book['title']},
+                    f"DTSTART;VALUE=DATE:{date}",
+                    f"DTEND;VALUE=DATE:{date}",
+                    f"SUMMARY:{book['title']}",
                     "DESCRIPTION;ENCODING=QUOTED-PRINTABLE:No description",
                     "END:VEVENT"
                    ]
@@ -115,6 +115,6 @@ class DashCal(object):
 
 
 if __name__ == "__main__":
-    html = open('morinatsu.html', 'r')
-    dashcal = DashCal(html)
+    test_html = open('morinatsu.html', 'r')
+    dashcal = DashCal(test_html)
     print(dashcal.to_ical())
