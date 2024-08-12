@@ -8,6 +8,7 @@ Rresponse ical data from ComicDash! new comic calender
 """
 import logging
 import re
+import traceback
 import requests
 from flask import Flask, request, make_response
 from dashcal import DashCal
@@ -42,14 +43,19 @@ def convert():
     try:
         res = requests.get(url, timeout=60.0)
     except requests.Timeout:
+        logging.error('request timeout, user: %s', user)
         resp = make_response("", 500)
-        logging.info('request timeout, user: %s', user)
         return resp
     except Exception as err:
         logging.error(f"Unexpected {err=}, {type(err)=}")
         logging.error(traceback.format_exc())
         raise
     # Convert to ical data
+    logging.info('res.content: %s', res.content[0:20])
+    if res.content is None:
+        logging.error('response is null')
+        resp = make_response("", 500)
+        return resp
     dashcal = DashCal(res.content)
     ical = dashcal.to_ical()
     status = 200
