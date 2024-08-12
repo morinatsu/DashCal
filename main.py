@@ -52,7 +52,7 @@ def convert():
         raise
     # Convert to ical data
     logging.info('res.content: %s', res.content[0:20])
-    if res.content is None:
+    if (res.content is None or res.content = b'\n'):
         logging.error('response is null')
         resp = make_response("", 500)
         return resp
