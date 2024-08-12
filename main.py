@@ -36,7 +36,7 @@ def convert():
     except ValueError:
         # invalid user
         resp = make_response("", 400)
-        logging.info('invalid user, user: %s', user)
+        logging.info('invalid user')
         return resp
     # fetch
     url = "http://ckworks.jp/comicdash/calendar/" + user
@@ -47,12 +47,12 @@ def convert():
         resp = make_response("", 500)
         return resp
     except Exception as err:
-        logging.error(f"Unexpected {err=}, {type(err)=}")
+        logging.error('Unexpected %s, %s',err, type(err))
         logging.error(traceback.format_exc())
         raise
     # Convert to ical data
     logging.info('res.content: %s', res.content[0:20])
-    if (res.content is None or res.content = b'\n'):
+    if (res.content is None or res.content == b'\n'):
         logging.error('response is null')
         resp = make_response("", 500)
         return resp
