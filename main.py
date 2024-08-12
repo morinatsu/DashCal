@@ -35,6 +35,7 @@ def convert():
     except ValueError:
         # invalid user
         resp = make_response("", 400)
+        logging.info('invalid user, user: %s', user)
         return resp
     # fetch
     url = "http://ckworks.jp/comicdash/calendar/" + user
@@ -42,7 +43,12 @@ def convert():
         res = requests.get(url, timeout=60.0)
     except requests.Timeout:
         resp = make_response("", 500)
+        logging.info('request timeout, user: %s', user)
         return resp
+    except Exception as err:
+        logging.error(f"Unexpected {err=}, {type(err)=}")
+        logging.error(traceback.format_exc())
+        raise
     # Convert to ical data
     dashcal = DashCal(res.content)
     ical = dashcal.to_ical()
