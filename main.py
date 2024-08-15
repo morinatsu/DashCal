@@ -39,7 +39,7 @@ def convert():
         logging.info('invalid user')
         return resp
     # fetch
-    url = "http://ckworks.jp/comicdash/calendar/" + user
+    url = "https://ckworks.jp/comicdash/calendar/" + user
     try:
         res = requests.get(url, timeout=60.0)
     except requests.Timeout:
