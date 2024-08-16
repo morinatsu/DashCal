@@ -8,10 +8,13 @@ requests = "*"
 beautifulsoup4 = "*"
 flask = "*"
 pylint = "*"
+google-cloud-datastore = "*"
+pytz = "*"
 
 [dev-packages]
 pip = "*"
 pylint = "*"
+pycodestyle = "*"
 
 [requires]
 python_version = "3.11"
