@@ -54,6 +54,7 @@ def convert():
         entity = datastore.Entity(key=key)
         entity["dt"] = datetime.now(japan_time)
         entity["html"] = html
+        client.put(entity)
 
     def fetch_from_site(user):
         logging.info('fetch_from_site')
