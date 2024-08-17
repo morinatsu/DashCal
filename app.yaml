@@ -1,4 +1,4 @@
 runtime: python311
 
 env_variables:
- BACKET_NAME: "comdashcal.appspot.com"
+ BUCKET_NAME: "comdashcal.appspot.com"
