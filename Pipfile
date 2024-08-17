@@ -10,6 +10,7 @@ flask = "*"
 pylint = "*"
 google-cloud-datastore = "*"
 pytz = "*"
+google-cloud-storage = "*"
 
 [dev-packages]
 pip = "*"

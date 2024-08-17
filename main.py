@@ -9,18 +9,20 @@ Rresponse ical data from ComicDash! new comic calender
 import logging
 import re
 import traceback
+import os
 from datetime import datetime
 from datetime import timedelta
 
 import requests
 import pytz
 from flask import Flask, request, make_response
-from google.cloud import datastore
+from google.cloud import storage
 
 from dashcal import DashCal
 
 app = Flask(__name__)
-client = datastore.Client()
+client = storage.Client()
+bucket_name = os.environ["BUCKET_NAME"]
 japan_time = pytz.timezone('Asia/Tokyo')
 
 
@@ -41,20 +43,19 @@ def convert():
     def get_from_cache(user, limit):
         """get html from cache"""
         logging.info('get_from_cahce')
-        key = client.key('Cache', user)
-        entity = client.get(key)
-        if entity is not None:
-            if entity.dt > limit:
-                return entity.html
+        bucket = client.bucket(bucket_name)
+        blob = bucket.blob(user)
+        if blob.exists() is True:
+            if blob.time_created > limit:
+                return blob.download_as_text()
         return None
 
     def put_to_cache(user, html):
         """put html to cache"""
-        key = client.key('Cache', user)
-        entity = datastore.Entity(key=key)
-        entity["dt"] = datetime.now(japan_time)
-        entity["html"] = html
-        client.put(entity)
+        logging.info('put_to_cahce')
+        bucket = client.bucket(bucket_name)
+        blob = bucket.blob(user)
+        blob.upload_from_string(html)
 
     def fetch_from_site(user):
         logging.info('fetch_from_site')
